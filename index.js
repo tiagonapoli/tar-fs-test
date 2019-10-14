@@ -1,6 +1,8 @@
 const tarFs = require('tar-fs');
 const tar = require('tar')
 const fs = require('fs')
+const tarStream = require('tar-stream')
+
 
 const openStream = () => {
   return new Promise((resolve) => {
@@ -19,5 +21,20 @@ const goTar = async () => {
   stream.pipe(tar.extract())
 }
 
+const goTarStream = async () => {
+  console.log("Go tar stream")
+  const extract = tarStream.extract()
+  extract.on('entry', function(header, stream, next) {
+    stream.on('end', function() {
+      next() 
+    })
+  
+    stream.resume()
+  })
+  const stream = await openStream()
+  stream.pipe(extract)
+}
+
 // goTarFs()
-goTar()
+// goTar()
+goTarStream()
