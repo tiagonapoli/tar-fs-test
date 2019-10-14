@@ -1,25 +1,23 @@
-const axios = require('axios');
 const tarFs = require('tar-fs');
+const tar = require('tar')
 const fs = require('fs')
 
-const url =
-  'http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.69.0/public/@types/vtex.render-runtime';
+const openStream = () => {
+  return new Promise((resolve) => {
+    const st = fs.createReadStream('./content.tar.gz')
+    st.on('open', resolve(st))
+  })
+}
 
-const go = async () => {
-  const res = await axios.get(url, {
-    responseType: 'stream',
-    headers: {
-      Accept: 'application/x-gzip',
-      'Accept-Encoding': 'gzip'
-    },
-  });
-  
-//   res.data.on('data', (v) => console.log(v.toString()))
-//   res.data.pipe(fs.createWriteStream('./content'))
-
-  fs.createReadStream('./content.tar.gz').pipe(tarFs.extract('./fromfile'))
-//   res.data.pipe(tarFs.extract('./wololo'));
-  
+const goTarFs = async () => {
+  const stream = await openStream()
+  stream.pipe(tarFs.extract('./fromfile'))
 };
 
-go()
+const goTar = async () => {
+  const stream = await openStream()
+  stream.pipe(tar.extract())
+}
+
+// goTarFs()
+goTar()
