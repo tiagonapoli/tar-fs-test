@@ -2,7 +2,13 @@ const tarFs = require('tar-fs');
 const tar = require('tar')
 const fs = require('fs')
 const tarStream = require('tar-stream')
+const gunzip = require('gunzip-maybe')
+const axios = require('axios')
 
+const getUrlStream = () => {
+  const url = 'http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.69.0/public/@types/vtex.render-runtime'
+  return axios.get(url, { responseType: 'stream' })  
+}
 
 const openStream = () => {
   return new Promise((resolve) => {
@@ -13,7 +19,7 @@ const openStream = () => {
 
 const goTarFs = async () => {
   const stream = await openStream()
-  stream.pipe(tarFs.extract('./fromfile'))
+  stream.pipe(gunzip()).pipe(tarFs.extract('./fromfile'))
 };
 
 const goTar = async () => {
@@ -31,8 +37,9 @@ const goTarStream = async () => {
   
     stream.resume()
   })
-  const stream = await openStream()
-  stream.pipe(extract)
+  const str = await getUrlStream()
+  str.data.on('data', (data) => console.log(data))
+  str.data.pipe(gunzip()).pipe(extract)
 }
 
 // goTarFs()
